@@ -1,0 +1,31 @@
+<html>
+<title>A Travelling Elf's Journal</title>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <link rel="icon" type="image/png" href="favicon.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
+  <link rel="stylesheet" href="style.css">
+  <script type='text/javascript' src='script.js'></script>
+</head>
+<body>
+  <div id="titlehead">
+	  <h1>A Travelling Elf's Journal</h1>
+  </div>
+  <br>
+  <form id="search_form" action="javascript:doSearch()">
+      <input type="text" id="search_field" placeholder="Enter your query…">
+	  <input type="button" onclick="doSearch()" value="Search">
+  </form>
+  <pre id="index">
+	  Loading...
+  </pre>
+  <br>
+  <p id="date-tag">Hello world!</p>
+  <script type="text/javascript">
+    window.onload = populateIndex();
+  </script>
+</body>
+</html>
