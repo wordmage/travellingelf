@@ -75,6 +75,8 @@ body {
 
 #section-head {
 	font: bold 1.2em 'Lora', sans-serif;
+	border-bottom: 1px dotted;
+	border-color: dimgrey;
 }
 
 input {
