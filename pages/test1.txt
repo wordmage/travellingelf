@@ -7,3 +7,5 @@ Hello world!
 <b>Hello again, world!</b>
 
 <marquee>WOOOO, FULL HTML</marquee>
+
+You might have missed it, but <link-to page="test2">here's a link to the second test!</link-to>

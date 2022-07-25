@@ -1,10 +1,30 @@
+// link-to implementation
+class LinkTo extends HTMLElement {
+  get hasPage() {
+    return this.hasAttribute("page");
+  }
+  
+  constructor() {
+    super();
+  }
+  
+  connectedCallback() {
+	  if (this.hasPage) {
+		  // Transform this link-to into an anchor.
+		  this.innerHTML = `<a href="/loader.html?page=${this.attributes.page.value}.txt">${this.innerHTML}</a>`;
+	  }
+  }
+}
+window.customElements.define('link-to', LinkTo); // Register.
+
+
 function showSpoiler(buttonNode, spoilerId) {
     document.getElementById(spoilerId).style.display = 'block';
     buttonNode.style.display = 'none';
 }
 
 function doSearch() {
-    window.location.href = "search.html?q=" + document.getElementById(
+    window.location.href = "/search.html?q=" + document.getElementById(
         "search_field").value;
 }
 
