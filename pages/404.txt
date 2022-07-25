@@ -1,0 +1,5 @@
+title:You have strayed
+update:Epoch
+[end]
+
+The link you visited has led you nowhere. Perhaps you've let yourself into an invalid address?
