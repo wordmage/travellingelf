@@ -17,6 +17,22 @@ class LinkTo extends HTMLElement {
 }
 window.customElements.define('link-to', LinkTo); // Register.
 
+class SectionHeading extends HTMLElement {
+	get hasTitle() {
+		return this.hasAttribute("title");
+	}
+	
+	constructor() {
+		super();
+	}
+	
+	connectedCallback() {
+		if (this.hasTitle) {
+			this.innerHTML = `<details><summary id="section-head">${this.attributes.title.value}</summary>${this.innerHTML}</details>`;
+		}
+	}
+}
+window.customElements.define('section-heading', SectionHeading); // Register.
 
 function showSpoiler(buttonNode, spoilerId) {
     document.getElementById(spoilerId).style.display = 'block';
