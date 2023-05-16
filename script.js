@@ -49,8 +49,14 @@ function getParameterByName(name) {
     return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 }
 
+function getCurrentUrl() {
+  return window.location.href
+}
+
 async function populateIndex() {
-    let indexResponse = await fetch('/index.txt');
+    let file = "index.txt";
+
+    let indexResponse = await fetch(`${getCurrentUrl()}/${file}`);
     let indexText = await indexResponse.text();
 
     let index = indexText.split(/\r?\n/);
@@ -125,10 +131,10 @@ async function populatePage() {
 }
 
 async function makeSearch() {
-    var file = "index.txt"
+    let file = "index.txt"
     var query = getParameterByName("q");
 
-    let response = await fetch('/index.txt');
+    let response = await fetch(`${getCurrentUrl()}/${file}`);
     let responseText = await response.text();
 
     let updateTo = document.getElementById('content');
