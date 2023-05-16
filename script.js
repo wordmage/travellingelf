@@ -34,6 +34,20 @@ class SectionHeading extends HTMLElement {
 }
 window.customElements.define('section-heading', SectionHeading); // Register.
 
+function getCurrentLanguage() {
+    return localStorage.getItem('locale') ?? "en";
+}
+
+function switchLanguage() {
+    if (getCurrentLanguage() == "en") {
+        localStorage.setItem('locale', "fl");
+    } else {
+        localStorage.setItem('locale', "en");
+    }
+    
+    location.reload();
+}
+
 function showSpoiler(buttonNode, spoilerId) {
     document.getElementById(spoilerId).style.display = 'block';
     buttonNode.style.display = 'none';
@@ -79,7 +93,7 @@ async function populateIndex() {
 
         // Linkify the text
         let elementLink =
-            `loader.html?page=${elementSplit[2].trim()}.txt`;
+            `loader.html?page=${getCurrentLanguage()}/${elementSplit[2].trim()}.txt`;
         let node = document.createTextNode(
             `• ${elementSplit[0].trim()}\n`);
 
@@ -167,7 +181,7 @@ async function makeSearch() {
 
             // Linkify the text
             let elementLink =
-                `loader.html?page=${elementSplit[2].trim()}.txt`;
+                `loader.html?page=${getCurrentLanguage()}/${elementSplit[2].trim()}.txt`;
             let node = document.createTextNode(
                 `• ${elementSplit[0].trim()}\n`);
 
