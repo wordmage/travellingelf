@@ -1,36 +1,36 @@
 // link-to implementation
 class LinkTo extends HTMLElement {
-  get hasPage() {
-    return this.hasAttribute("page");
-  }
-  
-  constructor() {
-    super();
-  }
-  
-  connectedCallback() {
-	  if (this.hasPage) {
-		  // Transform this link-to into an anchor.
-		  this.innerHTML = `<a href="/loader.html?page=${this.attributes.page.value}.txt">${this.innerHTML}</a>`;
-	  }
-  }
+    get hasPage() {
+        return this.hasAttribute("page");
+    }
+
+    constructor() {
+        super();
+    }
+
+    connectedCallback() {
+        if (this.hasPage) {
+            // Transform this link-to into an anchor.
+            this.innerHTML = `<a href="/loader.html?page=${this.attributes.page.value}.txt">${this.innerHTML}</a>`;
+        }
+    }
 }
 window.customElements.define('link-to', LinkTo); // Register.
 
 class SectionHeading extends HTMLElement {
-	get hasTitle() {
-		return this.hasAttribute("title");
-	}
-	
-	constructor() {
-		super();
-	}
-	
-	connectedCallback() {
-		if (this.hasTitle) {
-			this.innerHTML = `<details><summary id="section-head">${this.attributes.title.value}</summary>${this.innerHTML}</details>`;
-		}
-	}
+    get hasTitle() {
+        return this.hasAttribute("title");
+    }
+
+    constructor() {
+        super();
+    }
+
+    connectedCallback() {
+        if (this.hasTitle) {
+            this.innerHTML = `<details><summary id="section-head">${this.attributes.title.value}</summary>${this.innerHTML}</details>`;
+        }
+    }
 }
 window.customElements.define('section-heading', SectionHeading); // Register.
 
@@ -49,18 +49,106 @@ function getParameterByName(name) {
     return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 }
 
-function populateIndex() {
-    let file = "index.txt";
-    let xhr = new XMLHttpRequest();
-    xhr.onload = function () {
-        let indexTag = document.getElementById('index');
-        const index = this.responseText.split(/\r?\n/);
+async function populateIndex() {
+    let indexResponse = await fetch('/index.txt');
+    let indexText = await indexResponse.text();
 
-        if (index.length > 0) indexTag.innerHTML = "";
+    let index = indexText.split(/\r?\n/);
+    let indexTag = document.getElementById('index');
 
-        for (let element of index) {
+    if (index.length > 0) indexTag.innerHTML = "";
+
+    for (let element of index) {
+        let anchor = document.createElement('a');
+        let elementSplit = element.split("->");
+
+        // Some fancy categories.
+        let header = document.createElement('p');
+        let category = elementSplit[1];
+        let categoryName = category.replaceAll(' ', '');
+        let categoryHeader = document.createElement('div');
+
+        if (indexTag.querySelector(`#${categoryName}`) == null) {
+            indexTag.appendChild(header);
+        }
+
+        header.id = categoryName;
+        categoryHeader.innerHTML = `<b>${category.trim()}</b>\n`;
+        header.appendChild(categoryHeader);
+
+        // Linkify the text
+        let elementLink =
+            `loader.html?page=${elementSplit[2].trim()}.txt`;
+        let node = document.createTextNode(
+            `• ${elementSplit[0].trim()}\n`);
+
+        anchor.appendChild(node);
+        anchor.href = elementLink;
+
+        indexTag.querySelector(`#${categoryName}`).appendChild(anchor);
+    }
+}
+
+async function populatePage() {
+    let file = getParameterByName("page");
+    let folder = "pages"
+
+    let response = await fetch(`${folder}/${file}`);
+
+    if (response.status == 200) {
+        let responseText = await response.text();
+
+        let title = responseText.split('title:')[1].split('\n')[0];
+        let update = responseText.split('update:')[1].split('\n')[0];
+
+        document.title = `Viewing: ${title}`;
+
+        document.getElementById('date-tag').innerHTML =
+            `<b>Last updated</b>: ${update}`;
+        document.getElementById('content').innerHTML = responseText
+            .substring(responseText.indexOf("[end]") + 7);
+    } else if (response.status == 404) {
+        document.title = "A fragmented memory"
+
+        document.getElementById('date-tag').innerHTML =
+            "<b>Meditate.</b>";
+        document.getElementById('content').innerHTML =
+            "A memory misplaced, regressed by time."
+    } else {
+        document.title = "A disillusion"
+
+        document.getElementById('date-tag').innerHTML =
+            "<b>See past this fata morgana.</b>";
+        document.getElementById('content').innerHTML =
+            "A blurry text, unwound in recollection."
+    }
+}
+
+async function makeSearch() {
+    var file = "index.txt"
+    var query = getParameterByName("q");
+
+    let response = await fetch('/index.txt');
+    let responseText = await response.text();
+
+    let updateTo = document.getElementById('content');
+    let matches = 0;
+    const index = responseText.split(/\r?\n/);
+
+    document.title = `Searching: ${query}`;
+
+    for (let element of index) {
+        if (query === "" || !query) break;
+
+        let elementSplit = element.split("->");
+        let text = elementSplit[0].trim();
+
+        if (text.toLowerCase().includes(query.toLowerCase())) {
+            matches++;
+
+            if (matches == 1) updateTo.innerHTML = "";
+
             let anchor = document.createElement('a');
-            let elementSplit = element.split("->");
 
             // Some fancy categories.
             let header = document.createElement('p');
@@ -68,8 +156,8 @@ function populateIndex() {
             let categoryName = category.replaceAll(' ', '');
             let categoryHeader = document.createElement('div');
 
-            if (indexTag.querySelector(`#${categoryName}`) == null) {
-                indexTag.appendChild(header);
+            if (updateTo.querySelector(`#${categoryName}`) == null) {
+                updateTo.appendChild(header);
             }
 
             header.id = categoryName;
@@ -85,111 +173,20 @@ function populateIndex() {
             anchor.appendChild(node);
             anchor.href = elementLink;
 
-            indexTag.querySelector(`#${categoryName}`).appendChild(anchor);
-        }
-    };
-
-    xhr.open('GET', file);
-    xhr.send();
-}
-
-function populatePage() {
-    var file = getParameterByName("page");
-    var xhr = new XMLHttpRequest();
-    var folder = "pages"
-    xhr.onload = function () {
-        let title = this.responseText.split('title:')[1].split('\n')[0];
-        let update = this.responseText.split('update:')[1].split('\n')[0];
-
-        document.title = `Viewing: ${title}`;
-
-        document.getElementById('date-tag').innerHTML =
-            `<b>Last updated</b>: ${update}`;
-        document.getElementById('content').innerHTML = this.responseText
-            .substring(this.responseText.indexOf("[end]") + 7);
-    };
-
-    xhr.onloadend = function () {
-        if (xhr.status == 404) {
-            document.title = "A stray link"
-
-            document.getElementById('date-tag').innerHTML =
-                "<b>You have strayed.</b>";
-            document.getElementById('content').innerHTML =
-                "The link you visited has led you nowhere. Perhaps you've let yourself into an invalid address?"
+            updateTo.querySelector(`#${categoryName}`).appendChild(
+                anchor);
         }
     }
 
-    xhr.open('GET', `${folder}/${file}`);
-    xhr.send();
-}
-
-function makeSearch() {
-    var file = "index.txt"
-    var query = getParameterByName("q");
-    var xhr = new XMLHttpRequest();
-    xhr.onload = function () {
-        let updateTo = document.getElementById('content');
-        let matches = 0;
-        const index = this.responseText.split(/\r?\n/);
-
-        document.title = `Searching: ${query}`;
-
-        for (let element of index) {
-            if (query === "" || !query) break;
-
-            let elementSplit = element.split("->");
-            let text = elementSplit[0].trim();
-
-            if (text.toLowerCase().includes(query.toLowerCase())) {
-                matches++;
-
-                if (matches == 1) updateTo.innerHTML = "";
-
-                let anchor = document.createElement('a');
-
-                // Some fancy categories.
-                let header = document.createElement('p');
-                let category = elementSplit[1];
-                let categoryName = category.replaceAll(' ', '');
-                let categoryHeader = document.createElement('div');
-
-                if (updateTo.querySelector(`#${categoryName}`) == null) {
-                    updateTo.appendChild(header);
-                }
-
-                header.id = categoryName;
-                categoryHeader.innerHTML = `<b>${category.trim()}</b>\n`;
-                header.appendChild(categoryHeader);
-
-                // Linkify the text
-                let elementLink =
-                    `loader.html?page=${elementSplit[2].trim()}.txt`;
-                let node = document.createTextNode(
-                    `• ${elementSplit[0].trim()}\n`);
-
-                anchor.appendChild(node);
-                anchor.href = elementLink;
-
-                updateTo.querySelector(`#${categoryName}`).appendChild(
-                    anchor);
-            }
-        }
-
-        if (matches == 0) {
-            updateTo.innerHTML =
-                `<b>Your query yielded no result.</b><br>Perhaps try an alternative query?`;
-            document.title = "Search ends";
-            document.getElementById('date-tag').innerHTML =
-                `<b>Found</b>: ${matches} result(s)`;
-            return;
-        } else {
-            document.getElementById('date-tag').innerHTML =
-                `<b>Found</b>: ${matches} result(s)`;
-        }
-
-    };
-
-    xhr.open('GET', file);
-    xhr.send();
+    if (matches == 0) {
+        updateTo.innerHTML =
+            `<b>Your query yielded no result.</b><br>Perhaps try an alternative query?`;
+        document.title = "Search ends";
+        document.getElementById('date-tag').innerHTML =
+            `<b>Found</b>: ${matches} result(s)`;
+        return;
+    } else {
+        document.getElementById('date-tag').innerHTML =
+            `<b>Found</b>: ${matches} result(s)`;
+    }
 }
