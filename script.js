@@ -11,7 +11,7 @@ class LinkTo extends HTMLElement {
     connectedCallback() {
         if (this.hasPage) {
             // Transform this link-to into an anchor.
-            this.innerHTML = `<a href="/loader.html?page=${this.attributes.page.value}.txt">${this.innerHTML}</a>`;
+            this.innerHTML = `<a href="loader.html?page=${this.attributes.page.value}.txt">${this.innerHTML}</a>`;
         }
     }
 }
@@ -40,8 +40,7 @@ function showSpoiler(buttonNode, spoilerId) {
 }
 
 function doSearch() {
-    window.location.href = "/search.html?q=" + document.getElementById(
-        "search_field").value;
+    window.location.assign(`search.html?q=${document.getElementById("search_field").value}`);
 }
 
 function getParameterByName(name) {
@@ -49,14 +48,10 @@ function getParameterByName(name) {
     return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 }
 
-function getCurrentUrl() {
-  return window.location.href
-}
-
 async function populateIndex() {
     let file = "index.txt";
 
-    let indexResponse = await fetch(`${getCurrentUrl()}/${file}`);
+    let indexResponse = await fetch(file);
     let indexText = await indexResponse.text();
 
     let index = indexText.split(/\r?\n/);
@@ -134,8 +129,8 @@ async function makeSearch() {
     let file = "index.txt"
     var query = getParameterByName("q");
 
-    let response = await fetch(`${getCurrentUrl()}/${file}`);
-    let responseText = await response.text();
+    var response = await fetch(file);
+    var responseText = await response.text();
 
     let updateTo = document.getElementById('content');
     let matches = 0;
@@ -148,7 +143,7 @@ async function makeSearch() {
 
         let elementSplit = element.split("->");
         let text = elementSplit[0].trim();
-
+ 
         if (text.toLowerCase().includes(query.toLowerCase())) {
             matches++;
 
